@@ -73,4 +73,8 @@ cuffdiff \
 -u ~/genome/genes.gtf \
 sample1_1.bam,sample1_2.bam sample2_1.bam,sample2_2.bam
 ```
-## 
+## Metagene analysis
+Metagene analysis to determine the general distribution of m6A on transcripts was performed using `HOMER ver. 4.1`. Please note that `HOMER` only takes a particular file format.
+```
+annotatePeaks.pl sample_file.txt tair10 -size 10000 -hist 100
+```
