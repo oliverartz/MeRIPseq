@@ -78,3 +78,57 @@ Metagene analysis to determine the general distribution of m6A on transcripts wa
 ```
 annotatePeaks.pl sample_file.txt tair10 -size 10000 -hist 100
 ```
+`HOMER` output was visualized in R. If different samples were compared in one plot, `HOMER` results for both samples were combined into one file before visualization.
+```
+### loading libraries ###
+library(tidyverse)
+library(readxl)
+library(reshape2)
+library(cowplot)
+
+### importing data ###
+df <- read_excel("sample.xlsx")
+df <- df %>% select(1,4,5)
+colnames(df)[1] <- "coordinate"
+
+### setting plotting parameters ###
+linewidth_1pt <- 0.46686234423
+
+plot_theme <- list(theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(size = linewidth_1pt, linetype = "solid", color = "black"),
+        axis.ticks = element_line(size = linewidth_1pt, color = "black"),
+        axis.text = element_text(size = 9, color = "black"),
+        axis.title = element_text(size = 9),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 9),
+        legend.key.size = unit(.5,"line"),
+        plot.title = element_text(face = "bold", hjust = 0.5),
+        strip.text = element_text(size = 9, face = "bold"),
+        axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=0.5)
+        ))
+        
+### plotting and export to PDF ###
+df_plot <- melt(df, id = "coordinate")
+
+
+p <- ggplot(df_plot, aes(x = coordinate, y = value, color = variable)) +
+#  geom_line() +
+  geom_smooth(se = FALSE, span = 0.15, size = linewidth_1pt) +
+  geom_vline(xintercept = c(0,10000), linetype = "dashed", size = linewidth_1pt) +
+  ylab("rel. peaks / bp / gene") +
+  xlab("") +
+  scale_x_continuous(labels = c("5'UTR","TSS","TES","3'UTR"),
+                     breaks = c(-2500, 0, 10000, 12500)) +
+  scale_y_continuous(breaks = c(0, 0.02,0.05)) +
+  scale_color_manual(labels = c("sample_1","sample_2"), values = c("grey","#317ec2")) +
+  plot_theme +
+  theme(axis.ticks.x = element_blank()) +
+  ggtitle("title") 
+
+p
+
+pdf("output.pdf", width = 1.7, height = 1.7) 
+p
+dev.off()
+```
