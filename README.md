@@ -9,7 +9,7 @@ fastqc *.gz \
 --outdir=/fastqc
 ```
 ## Read Mapping
-High quality reads were mapped to the genome using `STAR` with the following options. The command was run as a for loop.
+High quality reads were mapped to the genome using `STAR ver. 2.7.5` with the following options. The command was run as a for loop. We used the Arabidopsis genome version TAIR10.
 ```
 STAR --runThreadN 16 \
 --genomeDir ~/genome/
@@ -28,7 +28,7 @@ for i in *_R1_001.fastq.gzAligned.sortedByCoord.out.bam; do mv -i "$i" "${i%_R1_
 done
 ```
 ## Identification of methylated loci (peak calling)
-Input and IP samples were sequenced to be able to identify RNA fragments that were enriched by immunoprecipitation with an a-m6A antibody. The peak caller `exomePeak` was used in this study. It runs in R and takes .bam files as input to identify enriched regions.
+Input and IP samples were sequenced to be able to identify RNA fragments that were enriched by immunoprecipitation with an a-m6A antibody. The peak caller `exomePeak ver. 1.6.0` was used in this study. It runs in R and takes .bam files as input to identify enriched regions.
 ```
 library(exomePeak)
 
@@ -47,7 +47,7 @@ quit("no")
 ```
 
 ## Motif analysis
-Enriched RNA motifs were identified using `HOMER`. Output files from `exomePeak` need to be reformatted to be suitable as inputs for `HOMER`. The following code was used for this task.
+Enriched RNA motifs were identified using `HOMER ver. 4.1`. Output files from `exomePeak` need to be reformatted to be suitable as inputs for `HOMER`. The following code was used for this task.
 ```
 sample_name <- "sample_name"
 sample_path <- paste("../exomepeak/",sample_name,"/peak.bed", sep = "")
@@ -55,15 +55,15 @@ output_name <- paste(sample_name,".txt", sep = "")
 df <- as.data.frame(read.table(sample_path,header = FALSE, sep="\t",stringsAsFactors=FALSE, quote=""))
 df$id <- row.names(df)
 df <- df[,c(13,1,2,3,6)]
-write.table(df, output_name, sep="\t", row.names=FALSE, quote = FALSE)
+write.table(df, output_name.txt, sep="\t", row.names=FALSE, quote = FALSE)
 ```
 `HOMER` was executed using the following code.
 ```
-findMotifsGenome.pl sample_name.txt tair10 sample_name -rna -len 6 -p 20
+findMotifsGenome.pl output_name.txt tair10 sample_name -rna -len 6 -p 20
 ```
 
 ## Differential gene expression analysis
-MeRIPseq files were not used to determine differentially expressed genes, because the read depth was too shallow. Instead, we performed RNAseq on rRNA depleted samples, mapped them to the genome as described above and performed differential gene expression analysis using `cuffdiff`. 
+MeRIPseq files were not used to determine differentially expressed genes, because the read depth was too shallow. Instead, we performed RNAseq on rRNA depleted samples, mapped them to the genome as described above and performed differential gene expression analysis using `cuffdiff ver. 2.1.1`. 
 ```
 cuffdiff \
 -o ~/data//cuffdiff/sample1_sample2 \
@@ -73,3 +73,4 @@ cuffdiff \
 -u ~/genome/genes.gtf \
 sample1_1.bam,sample1_2.bam sample2_1.bam,sample2_2.bam
 ```
+## 
